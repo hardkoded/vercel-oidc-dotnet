@@ -52,7 +52,7 @@ jobs:
         run: dotnet pack src/Vercel.Oidc/Vercel.Oidc.csproj --no-build -c Release -o artifacts
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: nuget
           path: artifacts/*
