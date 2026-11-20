@@ -25,7 +25,8 @@ using (VercelRequestContext.Use(new Dictionary<string, string?> { ["x-vercel-oid
 
 ## Not ported
 
-- The tests of `@vercel/oidc` that mock `token-util` internals or call the Vercel API are not ported yet.
+- Keyring-only Vercel CLI logins (newer `@vercel/oidc` versions delegate to the CLI for them).
+- `index-browser.test.ts`: there is no browser export.
 
 ## Differences from upstream
 
