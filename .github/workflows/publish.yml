@@ -22,14 +22,14 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # MinVer reads the version from the tag, so it needs the whole history.
           fetch-depth: 0
           ref: ${{ github.event.inputs.pack_ref || github.ref }}
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
 

@@ -12,7 +12,7 @@ Community .NET port of `@vercel/oidc` (version 3.2.0, the one `@ai-sdk/gateway` 
 - Upstream is `@vercel/oidc` (https://github.com/vercel/vercel, `packages/oidc`). Read the published 3.2.0 package (`npm pack @vercel/oidc@3.2.0`) before you change behavior. Reuse its names and files in C# casing.
 - If upstream behaves the same on purpose, do not "fix" it here. Report it, and open an issue for a hardening change.
 - A name upstream does not have is .NET-only. Name it in the PR report with the reason.
-- Port tests from upstream's `*.test.ts`, with the same names. The tests that mock `token-util` internals are not ported yet.
+- Port tests from upstream's `*.test.ts`, with the same names. Upstream mocks the `token-util` functions and `fs`. The port uses real files in a temporary directory and a fake Vercel API behind the HTTP client (`FakeVercelApi`), and checks the same calls on the requests and files. Only `getTokenPayload` has a mock seam (`TokenUtil.GetTokenPayloadOverride`).
 - Keep the file header (`Copyright 2023 Vercel, Inc.` and `SPDX-License-Identifier: Apache-2.0`). The `.editorconfig` enforces it.
 
 ## Style and tools
