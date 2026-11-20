@@ -131,13 +131,17 @@ public sealed class GetVercelOidcTokenErrorScenariosTests : OidcTestBase
         WriteAuthJson(AuthJson);
         WriteProjectJson(ProjectId, TeamId);
         Api.OnProjectToken = _ => FakeVercelApi.Json(HttpStatusCode.OK, """{"token":"new-valid-token"}""");
-        // Upstream makes saveToken throw EACCES. A directory in the place of the cache file makes the save fail on every OS and for root.
+        // Upstream makes saveToken throw EACCES. A directory in the place of the cache file makes the save fail on every OS and for root,
+        // and the message of that error differs by OS, so the test checks that the filesystem error itself is propagated.
         Directory.CreateDirectory(Path.Combine(TokenDataDir, ProjectId + ".json"));
         SetOidcToken(CreateExpiredToken());
 
         var error = await Assert.ThrowsAsync<VercelOidcTokenError>(() => GetTokenAsync());
 
-        Assert.Contains(ProjectId + ".json", error.Message);
+        Assert.True(
+            error.InnerException is IOException or UnauthorizedAccessException,
+            error.InnerException?.ToString()
+        );
     }
 
     [Fact]
