@@ -1,0 +1,50 @@
+name: Publish NuGet
+
+# The NuGet trusted-publishing policy is: owner hardkoded, repository vercel-oidc-dotnet, workflow file publish.yml,
+# no environment. Do not rename this file and do not add an `environment:` to the job.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      pack_ref:
+        description: "Optional git ref to pack. Leave empty to pack this workflow's ref."
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # MinVer reads the version from the tag, so it needs the whole history.
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.pack_ref || github.ref }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Test
+        run: dotnet test -c Release
+
+      - name: Pack
+        run: dotnet pack src/Vercel.Oidc/Vercel.Oidc.csproj -c Release -o artifacts
+
+      # nuget.org profile username (not email).
+      - name: NuGet login (OIDC to a temporary API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: kblok
+
+      - name: Push to nuget.org
+        run: dotnet nuget push "artifacts/*.nupkg" --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate

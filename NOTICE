@@ -1,0 +1,5 @@
+Vercel.Oidc
+Copyright 2026 Darío Kondratiuk
+
+This product includes software derived from @vercel/oidc (https://github.com/vercel/vercel),
+Copyright 2023 Vercel, Inc., licensed under the Apache License, Version 2.0.
