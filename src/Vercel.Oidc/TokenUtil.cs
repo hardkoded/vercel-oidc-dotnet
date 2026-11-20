@@ -30,6 +30,15 @@ internal sealed record ProjectInfo(string? ProjectId, string? TeamId);
 /// <summary>Maps to <c>token-util.ts</c> in <c>@vercel/oidc</c>.</summary>
 internal static class TokenUtil
 {
+    private static readonly AsyncLocal<Func<string, TokenPayload>?> s_getTokenPayloadOverride = new();
+
+    /// <summary>Test seam standing in for the <c>getTokenPayload</c> mock of upstream's tests.</summary>
+    internal static Func<string, TokenPayload>? GetTokenPayloadOverride
+    {
+        get => s_getTokenPayloadOverride.Value;
+        set => s_getTokenPayloadOverride.Value = value;
+    }
+
     /// <summary>The Vercel CLI data directory, or null when the user data directory is unknown.</summary>
     public static string? GetVercelDataDir()
     {
@@ -220,6 +229,11 @@ internal static class TokenUtil
     /// <summary>Decodes the payload segment of a JWT.</summary>
     public static TokenPayload GetTokenPayload(string token)
     {
+        if (GetTokenPayloadOverride is { } payloadOverride)
+        {
+            return payloadOverride(token);
+        }
+
         var tokenParts = token.Split('.');
         if (tokenParts.Length != 3)
         {
